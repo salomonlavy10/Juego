@@ -1,43 +1,107 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+var buttonColors = ["red", "blue", "green", "yellow", ]
+var userClickedPattern = [];
+var gamePattern = [];
+var level = 0;
+var started = false;
 
-<head>
-  <meta charset="utf-8">
-  <title>Simon</title>
-  <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-</head>
+$(document).keypress(function() {
+    if (!started) {
+      $("#level-title").text("Level " + level);
+      nextSequence();
+      started = true;
+    }
+  });
 
-<body>
-  <h1 id="level-title">Press A Key to Start</h1>
-  <div class="container">
-    <div lass="row">
+$("#level-title").click(function(){
+    if (!started) {
+        $("#level-title").text("Level " + level);
+        nextSequence();
+        started = true;
+      } 
+}
+);
 
-      <div type="button" id="green" class="btn green">
+$('.btn').click(function () {
+    var userChosenColour = $(this).attr("id");
+    userClickedPattern.push(userChosenColour);
+    playSound(userChosenColour);
+    animatePress(userChosenColour);
+    checkAnswer();
+})
 
-      </div>
+function checkAnswer(currentLevel) {
+    for (var i = 0; i<userClickedPattern.length;i++){
+        if (userClickedPattern[i] !== gamePattern[i] && gamePattern != 0){
+            $('#level-title').text("Perdiste Awebao");
+            $(document).addClass("game-over");
+            started = false;
+            level = 0;
+            userClickedPattern = [];
+            gamePattern = [];
+            $("body").addClass("game-over");
+      setTimeout(function () {
+        $("body").removeClass("game-over");
+      }, 200);
+            return;
+        }
+    }
+    //3. Write an if statement inside checkAnswer() to check if the most recent user answer is the same as the game pattern. If so then log "success", otherwise log "wrong".
+    if (gamePattern[currentLevel] === userClickedPattern[currentLevel]) {
 
-      <div type="button" id="red" class="btn red">
+      console.log("success");
 
-      </div>
-    </div>
+      //4. If the user got the most recent answer right in step 3, then check that they have finished their sequence with another if statement.
+      if (userClickedPattern.length === gamePattern.length){
 
-    <div class="row">
+        //5. Call nextSequence() after a 1000 millisecond delay.
+        setTimeout(function () {
+          nextSequence();
+        }, 1000);
 
-      <div type="button" id="yellow" class="btn yellow">
+      }
 
-      </div>
-      <div type="button" id="blue" class="btn blue">
+    } else {
 
-      </div>
+      console.log("wrong");
+      playSound("wrong");
+      $("body").addClass("game-over");
+      setTimeout(function () {
+        $("body").removeClass("game-over");
+      }, 200);
+      $("#level-title").text("Game Over, Press Any Key to Restart");
+    }
 
-    </div>
+}
 
-  </div>
+function nextSequence() {
+    userClickedPattern = [];
+    level++;
+    $("#level-title").text("Level " + level);
+    var randomNumber = Math.floor(Math.random() * 4);
+    var randomChosenColour = buttonColors[randomNumber];
+    gamePattern.push(randomChosenColour);
+
+    for (var i = 0; i < gamePattern.length; i++) {
+        (function(index) {
+            setTimeout(function() {
+                $("#" + gamePattern[index]).fadeIn(100).fadeOut(100).fadeIn(100);
+                playSound(gamePattern[index]);
+            }, 300 * index);
+        })(i);
+    }
+}
 
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="./index.js"></script>
-  <p class="jabo">Abraham es un jabito</p>
-</body>
-</html>
+function playSound(color) {
+    var audio = new Audio("sounds/" + color + ".mp3");
+    audio.play();
+}
+
+function animatePress(currentColor) {
+    $('#'+currentColor).addClass('pressed');
+    setTimeout(function() {$('#'+currentColor).removeClass('pressed');
+    }, 100);
+}
+
+
+
